@@ -6,13 +6,12 @@ import numpy as np
 
 try:
     data_dict = pickle.load(open('./data.pickle', 'rb'))
+    # print(data_dict.keys())
+    # print(data_dict)
     data = data_dict['data']
     labels = data_dict['labels']
 
-    # Find the maximum length of arrays in the data
     max_length = max(len(item) for item in data)
-
-    # Pad arrays in data to make them all the same length
     data = [item + [0] * (max_length - len(item)) for item in data]
 
     data = np.asarray(data)
