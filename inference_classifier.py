@@ -1,13 +1,11 @@
 import pickle
-
 import cv2
+from matplotlib import pyplot as plt
 import mediapipe as mp
 import numpy as np
 
 model_dict = pickle.load(open('./model.p', 'rb'))
 model = model_dict['model']
-
-cap = cv2.VideoCapture(0)
 
 mp_hands = mp.solutions.hands
 mp_drawing = mp.solutions.drawing_utils
@@ -16,8 +14,18 @@ mp_drawing_styles = mp.solutions.drawing_styles
 hands = mp_hands.Hands(static_image_mode=True, min_detection_confidence=0.3)
 
 labels_dict = {0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E', 5: 'F', 6: 'G', 7: 'H', 8: 'I', 9: 'J', 10: 'K', 11: 'L', 12: 'M', 13: 'N', 14: 'O', 15: 'P', 16: 'Q', 17: 'R', 18: 'S', 19: 'T', 20: 'U', 21: 'V', 22: 'W', 23: 'X', 24: 'Y', 25: 'Z'}
-while True:
 
+predicted_character = ""
+sentence = ""
+
+asl_image = cv2.imread('asl.jpg')
+
+cap = cv2.VideoCapture(0)
+
+SCREEN_WIDTH = 1000
+SCREEN_HEIGHT = 800
+
+while True:
     data_aux = []
     x_ = []
     y_ = []
@@ -60,19 +68,48 @@ while True:
         x2 = int(max(x_) * W) - 10
         y2 = int(max(y_) * H) - 10
 
-        prediction = model.predict([np.asarray(data_aux)])
-
-        predicted_character = labels_dict[int(prediction[0])]
+        cv2.putText(frame, predicted_character, (x1, y1 - 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
 
         cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 0), 4)
-        cv2.putText(frame, predicted_character, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 0, 0), 3,
-                    cv2.LINE_AA)
+
+    
+    frame[10:210, 10:310] = asl_image 
+
+    
+    frame = cv2.resize(frame, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
     cv2.imshow('frame', frame)
     key= cv2.waitKey(1)
-    if key == ord('q'):  # press 'q' to quit
-        break
 
+    if key == ord('n'):
+        if data_aux:
+            prediction = model.predict([np.asarray(data_aux)])
+            predicted_character = labels_dict[int(prediction[0])]
+            sentence += predicted_character
+            print(sentence)
+        else:
+            sentence += " "
+            print(sentence)
+
+    else:
+        if data_aux:
+            prediction = model.predict([np.asarray(data_aux)])
+            predicted_character = labels_dict[int(prediction[0])]
+        else:
+            predicted_character = ""
+
+    if key == ord('q'):
+        break
 
 cap.release()
 cv2.destroyAllWindows()
+
+
+# from collections import Counter
+# character_counts = Counter(sentence)
+# plt.figure(figsize=(10, 6))
+# plt.bar(character_counts.keys(), character_counts.values())
+# plt.xlabel('Predicted Characters')
+# plt.ylabel('Frequency')
+# plt.title('Inference Results')
+# plt.show()
