@@ -18,7 +18,7 @@ labels_dict = {0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E', 5: 'F', 6: 'G', 7: 'H', 8
 predicted_character = ""
 sentence = ""
 
-asl_image = cv2.imread('asl.jpg')
+# asl_image = cv2.imread('asl.jpg')
 
 cap = cv2.VideoCapture(0)
 
@@ -61,6 +61,9 @@ while True:
                 data_aux.append(y - min(y_))
         while len(data_aux) < 84:
             data_aux.append(0)
+        # while len(data_aux) < 42:
+        #     data_aux.append(0)
+        # data_aux = data_aux[:42]
 
         x1 = int(min(x_) * W) - 10
         y1 = int(min(y_) * H) - 10
@@ -73,7 +76,7 @@ while True:
         cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 0), 4)
 
     
-    frame[10:210, 10:310] = asl_image 
+    # frame[10:210, 10:310] = asl_image 
 
     
     frame = cv2.resize(frame, (SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -86,10 +89,10 @@ while True:
             prediction = model.predict([np.asarray(data_aux)])
             predicted_character = labels_dict[int(prediction[0])]
             sentence += predicted_character
-            print(sentence)
+            print("Predicted sentence is:", sentence)
         else:
             sentence += " "
-            print(sentence)
+            print("Predicted sentence is:", sentence)
 
     else:
         if data_aux:
